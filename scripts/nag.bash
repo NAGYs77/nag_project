@@ -6,15 +6,16 @@ __nag_run() {
   if [ -n "$TMUX" ]; then
     tmux split-window -h -l 45% "NAG_TARGET=$TMUX_PANE java -jar $NAG_JAR"
   else
-    local out sel
+    local out sel saved
     out=$(mktemp)
-    java -jar "$NAG_JAR" --out "$out" </dev/tty >/dev/tty 2>/tmp/nag.err
-    echo "run: size=$(stat -c %s "$out")" >> /tmp/nag.log
+    saved=$(stty -g </dev/tty)
+    stty sane </dev/tty
+    java -jar "$NAG_JAR" --out "$out" </dev/tty >/dev/tty 2>/dev/null
+    stty "$saved" </dev/tty
     if [ -s "$out" ]; then
       sel=$(<"$out")
       READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${sel}${READLINE_LINE:READLINE_POINT}"
       READLINE_POINT=$((READLINE_POINT + ${#sel}))
-      echo "inserted: [$READLINE_LINE]" >> /tmp/nag.log
     fi
     rm -f "$out"
   fi
@@ -24,7 +25,6 @@ __nag_tab_check() {
   local now=${EPOCHREALTIME/[.,]/}
   local diff=$(( (now - __nag_last) / 1000 ))
   __nag_last=$now
-  echo "tab diff=${diff}ms" >> /tmp/nag.log
   if [ "$diff" -lt 400 ]; then
     __nag_last=0
     bind '"\C-x\C-c": clear-screen'
