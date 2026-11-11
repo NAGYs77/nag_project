@@ -8,20 +8,23 @@ __nag_run() {
   else
     local out sel
     out=$(mktemp)
-    java -jar "$NAG_JAR" --out "$out" </dev/tty >/dev/tty 2>/dev/tty
+    java -jar "$NAG_JAR" --out "$out" </dev/tty >/dev/tty 2>/tmp/nag.err
+    echo "run: size=$(stat -c %s "$out")" >> /tmp/nag.log
     if [ -s "$out" ]; then
       sel=$(<"$out")
       READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${sel}${READLINE_LINE:READLINE_POINT}"
       READLINE_POINT=$((READLINE_POINT + ${#sel}))
+      echo "inserted: [$READLINE_LINE]" >> /tmp/nag.log
     fi
     rm -f "$out"
   fi
 }
 
 __nag_tab_check() {
-  local now=${EPOCHREALTIME/./}
+  local now=${EPOCHREALTIME/[.,]/}
   local diff=$(( (now - __nag_last) / 1000 ))
   __nag_last=$now
+  echo "tab diff=${diff}ms" >> /tmp/nag.log
   if [ "$diff" -lt 400 ]; then
     __nag_last=0
     bind '"\C-x\C-c": clear-screen'
