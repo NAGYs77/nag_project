@@ -1,1 +1,7 @@
 target/
+build/
+*.deb
+*.class
+.idea/
+.vscode/
+*.iml

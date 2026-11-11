@@ -93,4 +93,4 @@ nag_project/
 
 ## Licence
 
-À définir (par exemple MIT).
+MIT, voir le fichier [LICENSE](LICENSE).
