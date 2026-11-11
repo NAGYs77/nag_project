@@ -8,9 +8,9 @@ __nag_run() {
   else
     local out sel
     out=$(mktemp)
-    java -jar "$NAG_JAR" --out "$out"
+    java -jar "$NAG_JAR" --out "$out" </dev/tty >/dev/tty 2>/dev/tty
     if [ -s "$out" ]; then
-      sel=$(cat "$out")
+      sel=$(<"$out")
       READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${sel}${READLINE_LINE:READLINE_POINT}"
       READLINE_POINT=$((READLINE_POINT + ${#sel}))
     fi
@@ -24,7 +24,7 @@ __nag_tab_check() {
   __nag_last=$now
   if [ "$diff" -lt 400 ]; then
     __nag_last=0
-    bind '"\C-x\C-c": redraw-current-line'
+    bind '"\C-x\C-c": clear-screen'
     __nag_run
   else
     bind '"\C-x\C-c": complete'

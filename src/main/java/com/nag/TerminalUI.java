@@ -1,5 +1,7 @@
 package com.nag;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,7 +27,18 @@ import com.googlecode.lanterna.terminal.Terminal;
 
 public class TerminalUI {
 
-    public TerminalUI() {
+    private final String outFile;
+    private final String tmuxTarget;
+
+    public TerminalUI(String outFile, String tmuxTarget) {
+        this.outFile = outFile;
+        this.tmuxTarget = tmuxTarget;
+        run();
+    }
+
+    private void run() {
+        String[] selected = new String[1];
+
         try {
             Terminal terminal = new DefaultTerminalFactory().createTerminal();
             Screen screen = new TerminalScreen(terminal);
@@ -57,7 +70,7 @@ public class TerminalUI {
 
                 for (String cmd : historyCommands) {
                     listBox.addItem(cmd, () -> {
-                        System.out.println(cmd);
+                        selected[0] = cmd;
                         window.close();
                     });
                 }
@@ -81,7 +94,28 @@ public class TerminalUI {
             screen.stopScreen();
 
         } catch (Exception e) {
-            System.err.println("Erreur dans l'interface Lanterna :" + e.getMessage());
+            System.err.println("Erreur dans l'interface Lanterna : " + e.getMessage());
+        }
+
+        if (selected[0] != null) {
+            deliver(selected[0]);
+        }
+    }
+
+    private void deliver(String cmd) {
+        try {
+            if (tmuxTarget != null) {
+                new ProcessBuilder("tmux", "send-keys", "-t", tmuxTarget, "-l", cmd)
+                        .inheritIO()
+                        .start()
+                        .waitFor();
+            } else if (outFile != null) {
+                Files.writeString(Paths.get(outFile), cmd);
+            } else {
+                System.out.println(cmd);
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'envoi de la commande : " + e.getMessage());
         }
     }
 }
