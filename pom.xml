@@ -9,13 +9,11 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
-        <!-- Bibliothèque Lanterna pour l'interface graphique du terminal -->
         <dependency>
             <groupId>com.googlecode.lanterna</groupId>
             <artifactId>lanterna</artifactId>
@@ -25,7 +23,14 @@
 
     <build>
         <plugins>
-            <!-- Plugin pour regrouper ton code et Lanterna dans un seul JAR autonome -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>17</release>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
