@@ -90,13 +90,12 @@ Structure du projet :
 nag_project/
 ├── pom.xml
 ├── build-deb.sh
-├── scripts/
-│   ├── install.sh
-│   └── nag.bash
+├── scripts/nag.bash
 └── src/main/java/com/nag/
     ├── Main.java
     ├── TerminalUI.java
     └── HistoryReader.java
+```
 
 ## Licence
 
