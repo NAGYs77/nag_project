@@ -1,0 +1,42 @@
+name: Build and Release nag
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build JAR with Maven
+        run: mvn -B -q clean package
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p dist
+          cp target/*-jar-with-dependencies.jar dist/nag.jar
+          cp scripts/nag.bash dist/nag.bash
+          cp scripts/install.sh dist/install.sh
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/nag.jar
+            dist/nag.bash
+            dist/install.sh
+          generate_release_notes: true

@@ -2,6 +2,7 @@ package com.nag;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -44,6 +45,10 @@ public class TerminalUI {
             Screen screen = new TerminalScreen(terminal);
             screen.startScreen();
 
+            TerminalSize size = screen.getTerminalSize();
+            int listWidth = Math.max(24, size.getColumns() - 6);
+            int listHeight = Math.max(6, size.getRows() - 6);
+
             WindowBasedTextGUI textGUI = new MultiWindowTextGUI(screen);
 
             SimpleTheme theme = SimpleTheme.makeTheme(
@@ -58,19 +63,39 @@ public class TerminalUI {
             );
             textGUI.setTheme(theme);
 
-            BasicWindow window = new BasicWindow("Historique des commandes");
+            String nagLine = System.getenv("NAG_LINE");
+            List<String> items = new ArrayList<>();
+            String title = "Historique des commandes";
+
+            if (nagLine != null && !nagLine.isBlank()) {
+                List<HistoryReader.Entry> entries = HistoryReader.read(nagLine);
+                if (!entries.isEmpty()) {
+                    title = "Aide : " + nagLine.trim();
+                    for (HistoryReader.Entry e : entries) {
+                        String label = e.description().isEmpty()
+                                ? e.name()
+                                : e.name() + " — " + e.description();
+                        items.add(label);
+                    }
+                }
+            }
+
+            if (items.isEmpty()) {
+                items.addAll(HistoryReader.readHistory());
+            }
+
+            BasicWindow window = new BasicWindow(title);
             Panel panel = new Panel(new LinearLayout(Direction.VERTICAL));
 
-            List<String> historyCommands = HistoryReader.readHistory();
-
-            if (historyCommands.isEmpty()) {
-                panel.addComponent(new Label("Aucune commande trouvée dans l'historique."));
+            if (items.isEmpty()) {
+                panel.addComponent(new Label("Aucune suggestion disponible."));
             } else {
-                ActionListBox listBox = new ActionListBox(new TerminalSize(60, 12));
+                ActionListBox listBox = new ActionListBox(new TerminalSize(listWidth, listHeight));
 
-                for (String cmd : historyCommands) {
-                    listBox.addItem(cmd, () -> {
-                        selected[0] = cmd;
+                for (String item : items) {
+                    String insertValue = extractInsertValue(item, nagLine);
+                    listBox.addItem(item, () -> {
+                        selected[0] = insertValue;
                         window.close();
                     });
                 }
@@ -100,6 +125,15 @@ public class TerminalUI {
         if (selected[0] != null) {
             deliver(selected[0]);
         }
+    }
+
+    private String extractInsertValue(String displayItem, String nagLine) {
+        if (nagLine != null && !nagLine.isBlank()) {
+            int sep = displayItem.indexOf(" — ");
+            String nameOnly = (sep > 0) ? displayItem.substring(0, sep).trim() : displayItem.trim();
+            return " " + nameOnly;
+        }
+        return displayItem;
     }
 
     private void deliver(String cmd) {

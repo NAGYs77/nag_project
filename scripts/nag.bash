@@ -1,40 +1,111 @@
-export NAG_JAR="$HOME/.nag/nag.jar"
+export NAG_JAR="${NAG_JAR:-$HOME/.nag/nag.jar}"
 __nag_last=0
 
-__nag_run() {
-  history -a
-  if [ -n "$TMUX" ]; then
-    tmux split-window -h -l 45% "NAG_TARGET=$TMUX_PANE java -jar $NAG_JAR"
+__nag_now_ms() {
+  if [ -n "${EPOCHREALTIME:-}" ]; then
+    local v="${EPOCHREALTIME/[.,]/}"
+    echo $(( v / 1000 ))
   else
-    local out sel saved
-    out=$(mktemp)
-    saved=$(stty -g </dev/tty)
-    stty sane </dev/tty
-    java -jar "$NAG_JAR" --out "$out" </dev/tty >/dev/tty 2>/dev/null
-    stty "$saved" </dev/tty
-    if [ -s "$out" ]; then
-      sel=$(<"$out")
-      READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${sel}${READLINE_LINE:READLINE_POINT}"
-      READLINE_POINT=$((READLINE_POINT + ${#sel}))
-    fi
-    rm -f "$out"
+    date +%s%3N
   fi
 }
 
-__nag_tab_check() {
-  local now=${EPOCHREALTIME/[.,]/}
-  local diff=$(( (now - __nag_last) / 1000 ))
-  __nag_last=$now
-  if [ "$diff" -lt 400 ]; then
-    __nag_last=0
-    bind '"\C-x\C-c": clear-screen'
-    __nag_run
+__nag_open_side_window() {
+  local out="$1"
+  local done_flag="$2"
+  local java_cmd="NAG_LINE=\"${READLINE_LINE:-}\" java -jar \"$NAG_JAR\" --out \"$out\"; touch \"$done_flag\""
+
+  if command -v gnome-terminal >/dev/null 2>&1; then
+    gnome-terminal --geometry=68x26+960+0 -- bash -c "$java_cmd" >/dev/null 2>&1 &
+    return 0
+  elif command -v xfce4-terminal >/dev/null 2>&1; then
+    xfce4-terminal --geometry=68x26+960+0 -e "bash -c '$java_cmd'" >/dev/null 2>&1 &
+    return 0
+  elif command -v mate-terminal >/dev/null 2>&1; then
+    mate-terminal --geometry=68x26+960+0 -e "bash -c '$java_cmd'" >/dev/null 2>&1 &
+    return 0
+  elif command -v konsole >/dev/null 2>&1; then
+    konsole -e bash -c "$java_cmd" >/dev/null 2>&1 &
+    return 0
+  elif command -v alacritty >/dev/null 2>&1; then
+    alacritty -e bash -c "$java_cmd" >/dev/null 2>&1 &
+    return 0
+  elif command -v kitty >/dev/null 2>&1; then
+    kitty bash -c "$java_cmd" >/dev/null 2>&1 &
+    return 0
+  elif command -v x-terminal-emulator >/dev/null 2>&1; then
+    x-terminal-emulator -e bash -c "$java_cmd" >/dev/null 2>&1 &
+    return 0
+  fi
+  return 1
+}
+
+__nag_run() {
+  history -a
+  if [ ! -f "$NAG_JAR" ]; then
+    printf "\nnag: JAR introuvable (%s)\n" "$NAG_JAR" >/dev/tty
+    return 1
+  fi
+
+  # 1. Si l'utilisateur utilise déjà tmux : split natif côte à côte
+  if [ -n "${TMUX:-}" ]; then
+    local origin_pane
+    origin_pane=$(tmux display-message -p '#{pane_id}')
+    tmux split-window -h -l 42% -t "$origin_pane" \
+      -e "NAG_TARGET=$origin_pane" \
+      -e "NAG_LINE=${READLINE_LINE:-}" \
+      "java -jar \"$NAG_JAR\""
+    return 0
+  fi
+
+  local out sel
+  out=$(mktemp)
+
+  # 2. Sinon, fenêtre latérale via le terminal déjà présent sur la distribution
+  if { [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; }; then
+    local done_flag
+    done_flag=$(mktemp -u)
+    if __nag_open_side_window "$out" "$done_flag"; then
+      while [ ! -f "$done_flag" ]; do
+        sleep 0.05
+      done
+      rm -f "$done_flag"
+    else
+      # 3. Repli dans le terminal courant (SSH / TTY / terminal inconnu)
+      local saved
+      saved=$(stty -g </dev/tty 2>/dev/null || true)
+      stty sane </dev/tty 2>/dev/null || true
+      NAG_LINE="${READLINE_LINE:-}" java -jar "$NAG_JAR" --out "$out" </dev/tty >/dev/tty
+      [ -n "$saved" ] && stty "$saved" </dev/tty 2>/dev/null || true
+    fi
   else
-    bind '"\C-x\C-c": complete'
+    # 3. Repli sans serveur graphique (SSH / console TTY)
+    local saved
+    saved=$(stty -g </dev/tty 2>/dev/null || true)
+    stty sane </dev/tty 2>/dev/null || true
+    NAG_LINE="${READLINE_LINE:-}" java -jar "$NAG_JAR" --out "$out" </dev/tty >/dev/tty
+    [ -n "$saved" ] && stty "$saved" </dev/tty 2>/dev/null || true
+  fi
+
+  if [ -s "$out" ]; then
+    sel=$(<"$out")
+    READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${sel}${READLINE_LINE:READLINE_POINT}"
+    READLINE_POINT=$((READLINE_POINT + ${#sel}))
+  fi
+  rm -f "$out"
+}
+
+__nag_tab_check() {
+  local now diff
+  now=$(__nag_now_ms)
+  diff=$(( now - __nag_last ))
+  __nag_last=$now
+  if [ "$diff" -lt 450 ]; then
+    __nag_last=0
+    __nag_run
   fi
 }
 
 bind -x '"\C-x\C-t": __nag_tab_check'
-bind '"\C-x\C-c": complete'
-bind '"\t": "\C-x\C-t\C-x\C-c"'
+bind '"\t": "\C-x\C-t"'
 bind -x '"\C-g": __nag_run'
