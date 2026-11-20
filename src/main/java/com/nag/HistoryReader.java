@@ -24,14 +24,21 @@ public class HistoryReader {
     private static final Pattern SAFE = Pattern.compile("[A-Za-z0-9_.-]+");
 
     private static final Pattern SUB = Pattern.compile(
-            "^\\s{1,6}([a-z][a-z0-9_-]*)(?:,\\s*[a-z][a-z0-9_-]*)?\\s{2,}(\\S.*)$");
+            "^\\s{1,12}([a-z][a-z0-9_-]*)\\*?(?:,\\s*[a-z][a-z0-9_-]*\\*?)?\\s{2,}(\\S.*)$");
 
     private static final Pattern LONG_OPT = Pattern.compile(
-            "^\\s{1,8}(?:-[A-Za-z0-9],?\\s+)?(--[A-Za-z0-9][A-Za-z0-9-]*)"
-            + "(?:[=\\[<]\\S*)?(?:\\s+(?:<[^>]+>|[A-Z][A-Z_]*))?\\s{2,}(\\S.*)$");
+            "^\\s{1,12}(?:-[A-Za-z0-9],?\\s+)?(--[A-Za-z0-9][A-Za-z0-9-]*)"
+            + "(?:[=\\[<]\\S*)?(?:\\s+(?:<[^>]+>|[A-Z][A-Z0-9_-]*))?\\s{2,}(\\S.*)$");
 
     private static final Pattern SHORT_OPT = Pattern.compile(
-            "^\\s{1,8}(-[A-Za-z0-9])(?:\\s+(?:<[^>]+>|[A-Z][A-Z_]*))?\\s{2,}(\\S.*)$");
+            "^\\s{1,12}(-[A-Za-z0-9])(?:\\s+(?:<[^>]+>|[A-Z][A-Z0-9_-]*))?\\s{2,}(\\S.*)$");
+
+    // Repli souple pour les sorties d'aide moins conventionnelles (ex. certains outils/sous-commandes)
+    private static final Pattern FALLBACK_OPT = Pattern.compile(
+            "^\\s{1,16}(-[A-Za-z0-9-]{1,32})(?:[=\\s]+\\S+)?\\s+(\\S.*)$");
+
+    private static final Pattern FALLBACK_CMD = Pattern.compile(
+            "^\\s{1,16}([a-z][a-z0-9_-]{1,31})\\s+(\\S.*)$");
 
     public static List<Entry> read(String line) {
         if (line == null) {
@@ -165,7 +172,7 @@ public class HistoryReader {
             pb.environment().put("NO_COLOR", "1");
 
             Process p = pb.start();
-            if (!p.waitFor(2, TimeUnit.SECONDS)) {
+            if (!p.waitFor(5, TimeUnit.SECONDS)) {
                 p.destroyForcibly();
                 return List.of();
             }
@@ -208,6 +215,28 @@ public class HistoryReader {
             if (m.matches()) {
                 String cleanDesc = m.group(2).trim().replaceAll("\\s+", " ");
                 shortOpts.putIfAbsent(m.group(1), new Entry(m.group(1), cleanDesc));
+            }
+        }
+
+        if (subs.isEmpty() && longOpts.isEmpty() && shortOpts.isEmpty()) {
+            for (String l : lines) {
+                Matcher m = FALLBACK_OPT.matcher(l);
+                if (m.matches()) {
+                    String name = m.group(1);
+                    String desc = m.group(2).trim().replaceAll("\\s+", " ");
+                    if (name.startsWith("--")) {
+                        longOpts.putIfAbsent(name, new Entry(name, desc));
+                    } else {
+                        shortOpts.putIfAbsent(name, new Entry(name, desc));
+                    }
+                    continue;
+                }
+                m = FALLBACK_CMD.matcher(l);
+                if (m.matches()) {
+                    String name = m.group(1);
+                    String desc = m.group(2).trim().replaceAll("\\s+", " ");
+                    subs.putIfAbsent(name, new Entry(name, desc));
+                }
             }
         }
 
