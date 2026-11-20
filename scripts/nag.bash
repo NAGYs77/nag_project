@@ -1,5 +1,6 @@
 export NAG_JAR="${NAG_JAR:-$HOME/.nag/nag.jar}"
 __nag_last=0
+__nag_line_buf=""
 
 __nag_now_ms() {
   if [ -n "${EPOCHREALTIME:-}" ]; then
@@ -42,17 +43,19 @@ __nag_run() {
     return 1
   fi
 
+  local current_line="${READLINE_LINE:-$__nag_line_buf}"
+  __nag_line_buf=""
+
   local line_file
   line_file=$(mktemp)
-  printf '%s' "${READLINE_LINE:-}" > "$line_file"
+  printf '%s' "${current_line:-}" > "$line_file"
 
-  # 1. Si l'utilisateur utilise déjà tmux : split natif côte à côte
   if [ -n "${TMUX:-}" ]; then
     local origin_pane
     origin_pane=$(tmux display-message -p '#{pane_id}')
     tmux split-window -h -l 42% -t "$origin_pane" \
       -e "NAG_TARGET=$origin_pane" \
-      -e "NAG_LINE=${READLINE_LINE:-}" \
+      -e "NAG_LINE=${current_line:-}" \
       -e "NAG_LINE_FILE=$line_file" \
       "java -jar \"$NAG_JAR\""
     rm -f "$line_file"
@@ -62,7 +65,6 @@ __nag_run() {
   local out sel
   out=$(mktemp)
 
-  # 2. Sinon, fenêtre latérale via le terminal déjà présent sur la distribution
   if { [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; }; then
     local done_flag
     done_flag=$(mktemp -u)
@@ -72,19 +74,17 @@ __nag_run() {
       done
       rm -f "$done_flag"
     else
-      # 3. Repli dans le terminal courant (SSH / TTY / terminal inconnu)
       local saved
       saved=$(stty -g </dev/tty 2>/dev/null || true)
       stty sane </dev/tty 2>/dev/null || true
-      NAG_LINE="${READLINE_LINE:-}" NAG_LINE_FILE="$line_file" java -jar "$NAG_JAR" --out "$out" </dev/tty >/dev/tty
+      NAG_LINE="${current_line:-}" NAG_LINE_FILE="$line_file" java -jar "$NAG_JAR" --out "$out" </dev/tty >/dev/tty
       [ -n "$saved" ] && stty "$saved" </dev/tty 2>/dev/null || true
     fi
   else
-    # 3. Repli sans serveur graphique (SSH / console TTY)
     local saved
     saved=$(stty -g </dev/tty 2>/dev/null || true)
     stty sane </dev/tty 2>/dev/null || true
-    NAG_LINE="${READLINE_LINE:-}" NAG_LINE_FILE="$line_file" java -jar "$NAG_JAR" --out "$out" </dev/tty >/dev/tty
+    NAG_LINE="${current_line:-}" NAG_LINE_FILE="$line_file" java -jar "$NAG_JAR" --out "$out" </dev/tty >/dev/tty
     [ -n "$saved" ] && stty "$saved" </dev/tty 2>/dev/null || true
   fi
 
@@ -103,7 +103,12 @@ __nag_tab_check() {
   now=$(__nag_now_ms)
   diff=$(( now - __nag_last ))
   __nag_last=$now
-  if [ "$diff" -lt 450 ]; then
+
+  if [ -n "${READLINE_LINE:-}" ]; then
+    __nag_line_buf="$READLINE_LINE"
+  fi
+
+  if [ "$diff" -lt 650 ]; then
     __nag_last=0
     __nag_run
   fi
