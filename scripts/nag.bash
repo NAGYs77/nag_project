@@ -13,7 +13,9 @@ __nag_now_ms() {
 __nag_open_side_window() {
   local out="$1"
   local done_flag="$2"
-  local java_cmd="NAG_LINE=\"${READLINE_LINE:-}\" java -jar \"$NAG_JAR\" --out \"$out\"; touch \"$done_flag\""
+  local line_b64
+  line_b64=$(printf '%s' "${READLINE_LINE:-}" | base64 -w0 2>/dev/null || printf '%s' "${READLINE_LINE:-}" | base64 | tr -d '\n')
+  local java_cmd="export NAG_LINE=\"\$(printf '%s' '${line_b64}' | base64 -d 2>/dev/null)\"; java -jar \"$NAG_JAR\" --out \"$out\"; touch \"$done_flag\""
 
   if command -v gnome-terminal >/dev/null 2>&1; then
     gnome-terminal --geometry=68x26+960+0 -- bash -c "$java_cmd" >/dev/null 2>&1 &
@@ -29,12 +31,6 @@ __nag_open_side_window() {
     return 0
   elif command -v alacritty >/dev/null 2>&1; then
     alacritty -e bash -c "$java_cmd" >/dev/null 2>&1 &
-    return 0
-  elif command -v kitty >/dev/null 2>&1; then
-    kitty bash -c "$java_cmd" >/dev/null 2>&1 &
-    return 0
-  elif command -v x-terminal-emulator >/dev/null 2>&1; then
-    x-terminal-emulator -e bash -c "$java_cmd" >/dev/null 2>&1 &
     return 0
   fi
   return 1

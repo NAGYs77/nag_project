@@ -115,23 +115,33 @@ public class HistoryReader {
 
         try {
             List<String> rawLines = Files.readAllLines(historyPath, StandardCharsets.UTF_8);
-            Set<String> uniqueRecent = new LinkedHashSet<>();
+            Set<String> seen = new LinkedHashSet<>();
 
             for (int i = rawLines.size() - 1; i >= 0; i--) {
                 String cmd = rawLines.get(i).trim();
-                if (cmd.isEmpty() || cmd.startsWith("#")) {
+                if (cmd.isEmpty() || cmd.startsWith("#") || hasInvalidChars(cmd)) {
                     continue;
                 }
-                uniqueRecent.add(cmd);
-                if (uniqueRecent.size() >= 200) {
+                seen.add(cmd);
+                if (seen.size() >= 200) {
                     break;
                 }
             }
 
-            return new ArrayList<>(uniqueRecent);
+            return new ArrayList<>(seen);
         } catch (Exception e) {
             return List.of();
         }
+    }
+
+    private static boolean hasInvalidChars(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c < 0x20 || c == 0x7F || c > 0x7E) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static List<String> withArg(String[] tokens, String arg) {
