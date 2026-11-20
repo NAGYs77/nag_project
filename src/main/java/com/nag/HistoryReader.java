@@ -33,7 +33,6 @@ public class HistoryReader {
     private static final Pattern SHORT_OPT = Pattern.compile(
             "^\\s{1,12}(-[A-Za-z0-9])(?:\\s+(?:<[^>]+>|[A-Z][A-Z0-9_-]*))?\\s{2,}(\\S.*)$");
 
-    // Repli souple pour les sorties d'aide moins conventionnelles (ex. certains outils/sous-commandes)
     private static final Pattern FALLBACK_OPT = Pattern.compile(
             "^\\s{1,16}(-[A-Za-z0-9-]{1,32})(?:[=\\s]+\\S+)?\\s+(\\S.*)$");
 
