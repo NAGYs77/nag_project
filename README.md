@@ -1,4 +1,5 @@
-[Capture vidéo du 2026-11-20 22-58-35.webm](https://github.com/user-attachments/assets/8d1d800d-7508-4f3b-b509-cc663a557127)
+[Capture vidéo du 2026-11-20 23-05-41.webm](https://github.com/user-attachments/assets/396b443e-d25a-4a3d-8893-b6a8f0ae8f26)
+
 # nag
 
 **NAG** (*NAGYs77 Terminal Helper*) — Aide contextuelle et historique interactif pour le terminal.
