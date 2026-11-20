@@ -23,10 +23,12 @@ Priority: optional
 Architecture: all
 Depends: openjdk-17-jre-headless | openjdk-21-jre-headless | openjdk-25-jre-headless
 Recommends: tmux
-Maintainer: NAGYs77 <ton-email@example.com>
+Maintainer: NAGYs77 <hassadsallah@gmail.com>
 Description: Historique de commandes interactif (Tab Tab)
+ ecrire le debut de la ligne de commande seulement ,
+ 3 caractères ,
  Appuie deux fois sur Tab pour ouvrir l'historique,
- choisis une commande et elle est collee dans le terminal.
+ choisis une commande que vous voulez utiliser et elle est collee dans le terminal.
 CTL
 
 cat > "$ROOT/DEBIAN/postinst" << 'PIN'
