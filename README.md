@@ -1,48 +1,40 @@
 # nag
 
-**NAG** (*NAGYs77 Terminal Helper*) — Aide contextuelle et historique interactif pour le terminal.
-Tape une commande (par exemple `docker` ou `nginx` autre outils ou logiciel ) puis appuie deux fois sur **Tab** (**Tab Tab**) pour afficher son aide, ou appuie sur **Tab Tab** sur une ligne vide pour parcourir l'historique des commandes sans doublons ni caractères indésirables.
+Historique de commandes interactif pour le terminal.
+Appuie deux fois sur **Tab**, choisis une commande dans la liste, et elle est collée directement sur ta ligne de commande.
 
 ## Fonctionnalités
 
-- Ouverture rapide avec **Tab Tab** (appui 2 fois sur **Tab**) ou **Ctrl+G**
-- Affichage de l'aide de la commande tapée (ex. `docker` + **Tab Tab** affiche l'aide de `docker`)
-- Historique des commandes filtré (sans caractères indésirables ni doublons), les plus récentes en haut
+- Ouverture rapide avec **Tab Tab** (ou **Ctrl+G**)
+- Liste des commandes les plus récentes en haut
 - Ligne survolée en surbrillance
-- Insertion de la commande ou de l'option choisie sans l'exécuter : tu appuies sur Entrée toi-même
-- Ouverture dans une fenêtre latérale ou un panneau dédié selon l'environnement
+- Insertion de la commande sans l'exécuter : tu appuies sur Entrée toi-même
+- Dans **tmux**, le panneau s'ouvre à droite du terminal
 
 ## Installation
 
-### Toutes les distributions Linux (installateur universel)
-
-Recommandé si tu n'es pas sur Debian/Ubuntu ou si tu veux une installation rapide en une commande (nécessite **Java 17+**, `curl` ou `wget`) :
-
-curl -fsSL https://raw.githubusercontent.com/NAGYs77/nag_project/main/scripts/install.sh | bash
-
-*(Ou avec `wget` :)*
-
-wget -qO- https://raw.githubusercontent.com/NAGYs77/nag_project/main/scripts/install.sh | bash
-
-Puis ouvre un nouveau terminal (ou exécute `source ~/.bashrc`).
-
 ### Ubuntu / Debian (apt)
 
+```bash
 echo "deb [trusted=yes] https://NAGYs77.github.io/apt ./" | sudo tee /etc/apt/sources.list.d/nag.list
 sudo apt update
 sudo apt install nag
+```
 
 Puis ouvre un nouveau terminal.
 
 ### Fichier .deb
 
+```bash
 wget https://github.com/NAGYs77/nag_project/releases/download/v1.0.0/nag_1.0.0_all.deb
 sudo apt install ./nag_1.0.0_all.deb
+```
 
 ### Depuis les sources
 
-Prérequis : **Java 17+** et **Maven**.
+Prérequis : Java 17+ et Maven.
 
+```bash
 git clone https://github.com/NAGYs77/nag_project.git
 cd nag_project
 mvn clean package
@@ -50,43 +42,45 @@ mkdir -p ~/.nag
 cp target/project-1.0-SNAPSHOT-jar-with-dependencies.jar ~/.nag/nag.jar
 cp scripts/nag.bash ~/.nag/nag.bash
 echo 'source "$HOME/.nag/nag.bash"' >> ~/.bashrc
+```
 
 ## Utilisation
 
 | Touche | Action |
 |---|---|
-| **Tab Tab** (2 fois sur Tab) | Affiche l'aide de la commande en cours (ex. `docker`) ou l'historique si la ligne est vide |
-| **Ctrl+G** | Ouvre la fenêtre / liste (raccourci de secours) |
+| **Tab Tab** (rapide) | Ouvre la liste de l'historique |
+| **Ctrl+G** | Ouvre la liste (raccourci de secours) |
 | Flèches haut / bas | Naviguer |
-| **Entrée** | Coller l'élément sélectionné sur la ligne |
+| **Entrée** | Coller la commande sur la ligne |
 | **Échap** | Fermer sans rien choisir |
 
-Un seul **Tab** garde l'autocomplétion normale de bash.
+Un seul Tab garde l'autocomplétion normale de bash.
 
 ## Désinstallation
 
-- **Via APT / `.deb` :**
-
+```bash
 sudo apt remove nag
+```
 
-- **Via l'installateur universel ou depuis les sources :**
-
-Retire la ligne qui source `nag.bash` dans `~/.bashrc` et supprime les fichiers installés (`~/.nag` ou `~/.local/share/nag`).
+Si tu as installé depuis les sources, retire la ligne `source "$HOME/.nag/nag.bash"` de `~/.bashrc` et supprime `~/.nag`.
 
 ## Limites actuelles
 
 - Bash uniquement (zsh et fish ne sont pas encore supportés)
 - Linux uniquement
 - Nécessite Java 17 ou plus
-- Lit l'historique shell (`~/.bash_history` ou `HISTFILE`) en ignorant les caractères indésirables et les doublons
+- Lit `~/.bash_history` : les commandes de la session en cours sont ajoutées avant l'ouverture de la liste
 
 ## Développement
 
+```bash
 mvn clean package
 ./build-deb.sh
+```
 
 Structure du projet :
 
+```
 nag_project/
 ├── pom.xml
 ├── build-deb.sh
