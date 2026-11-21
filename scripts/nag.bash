@@ -19,19 +19,19 @@ __nag_open_side_window() {
   local java_cmd="export NAG_LINE=\"\$(printf '%s' '${line_b64}' | base64 -d 2>/dev/null)\"; java -jar \"$NAG_JAR\" --out \"$out\"; touch \"$done_flag\""
 
   if command -v gnome-terminal >/dev/null 2>&1; then
-    gnome-terminal --geometry=68x26+960+0 -- bash -c "$java_cmd" >/dev/null 2>&1 &
+    (gnome-terminal --geometry=68x26+960+0 -- bash -c "$java_cmd" >/dev/null 2>&1 &)
     return 0
   elif command -v xfce4-terminal >/dev/null 2>&1; then
-    xfce4-terminal --geometry=68x26+960+0 -e "bash -c '$java_cmd'" >/dev/null 2>&1 &
+    (xfce4-terminal --geometry=68x26+960+0 -e "bash -c '$java_cmd'" >/dev/null 2>&1 &)
     return 0
   elif command -v mate-terminal >/dev/null 2>&1; then
-    mate-terminal --geometry=68x26+960+0 -e "bash -c '$java_cmd'" >/dev/null 2>&1 &
+    (mate-terminal --geometry=68x26+960+0 -e "bash -c '$java_cmd'" >/dev/null 2>&1 &)
     return 0
   elif command -v konsole >/dev/null 2>&1; then
-    konsole -e bash -c "$java_cmd" >/dev/null 2>&1 &
+    (konsole -e bash -c "$java_cmd" >/dev/null 2>&1 &)
     return 0
   elif command -v alacritty >/dev/null 2>&1; then
-    alacritty -e bash -c "$java_cmd" >/dev/null 2>&1 &
+    (alacritty -e bash -c "$java_cmd" >/dev/null 2>&1 &)
     return 0
   fi
   return 1
