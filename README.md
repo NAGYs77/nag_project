@@ -20,31 +20,40 @@ Tape une commande (par exemple `docker`) puis appuie deux fois sur **Tab** (**Ta
 
 Recommandé si tu n'es pas sur Debian/Ubuntu ou si tu veux une installation rapide en une commande (nécessite **Java 17+**, `curl` ou `wget`) :
 
+```bash
 curl -fsSL https://raw.githubusercontent.com/NAGYs77/nag_project/main/scripts/install.sh | bash
+```
 
 *(Ou avec `wget` :)*
 
+```bash
 wget -qO- https://raw.githubusercontent.com/NAGYs77/nag_project/main/scripts/install.sh | bash
+```
 
 Puis ouvre un nouveau terminal (ou exécute `source ~/.bashrc`).
 
 ### Ubuntu / Debian (apt)
 
+```bash
 echo "deb [trusted=yes] https://NAGYs77.github.io/apt ./" | sudo tee /etc/apt/sources.list.d/nag.list
 sudo apt update
 sudo apt install nag
+```
 
 Puis ouvre un nouveau terminal.
 
 ### Fichier .deb
 
+```bash
 wget https://github.com/NAGYs77/nag_project/releases/download/v1.0.0/nag_1.0.0_all.deb
 sudo apt install ./nag_1.0.0_all.deb
+```
 
 ### Depuis les sources
 
 Prérequis : **Java 17+** et **Maven**.
 
+```bash
 git clone https://github.com/NAGYs77/nag_project.git
 cd nag_project
 mvn clean package
@@ -52,6 +61,7 @@ mkdir -p ~/.nag
 cp target/project-1.0-SNAPSHOT-jar-with-dependencies.jar ~/.nag/nag.jar
 cp scripts/nag.bash ~/.nag/nag.bash
 echo 'source "$HOME/.nag/nag.bash"' >> ~/.bashrc
+```
 
 ## Utilisation
 
@@ -69,7 +79,9 @@ Un seul **Tab** garde l'autocomplétion normale de bash.
 
 - **Via APT / `.deb` :**
 
+```bash
 sudo apt remove nag
+```
 
 - **Via l'installateur universel ou depuis les sources :**
 
@@ -84,11 +96,14 @@ Retire la ligne qui source `nag.bash` dans `~/.bashrc` et supprime les fichiers 
 
 ## Développement
 
+```bash
 mvn clean package
 ./build-deb.sh
+```
 
 Structure du projet :
 
+```
 nag_project/
 ├── pom.xml
 ├── build-deb.sh
@@ -99,6 +114,7 @@ nag_project/
     ├── Main.java
     ├── TerminalUI.java
     └── HistoryReader.java
+```
 
 ## Licence
 
