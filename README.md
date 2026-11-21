@@ -21,13 +21,13 @@ Tape une commande (par exemple `docker`) puis appuie deux fois sur **Tab** (**Ta
 Recommandé si tu n'es pas sur Debian/Ubuntu ou si tu veux une installation rapide en une commande (nécessite **Java 17+**, `curl` ou `wget`) :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/NAGYs77/nag_project/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/NAGYs77/nag_project/master/scripts/install.sh | bash
 ```
 
 *(Ou avec `wget` :)*
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/NAGYs77/nag_project/main/scripts/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/NAGYs77/nag_project/master/scripts/install.sh | bash
 ```
 
 Puis ouvre un nouveau terminal (ou exécute `source ~/.bashrc`).
