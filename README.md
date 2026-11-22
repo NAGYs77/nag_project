@@ -3,12 +3,12 @@
 # nag
 
 **NAG** (*NAGYs77 Terminal Helper*) — Aide contextuelle et historique interactif pour le terminal.
-Tape une commande (par exemple `docker`) puis appuie deux fois sur **Tab** (**Tab Tab**) pour afficher son aide, ou appuie sur **Tab Tab** sur une ligne vide pour parcourir l'historique des commandes sans doublons ni caractères indésirables.
+Tape une commande (par exemple `docker`) puis appuie sur **Ctrl+G** pour afficher son aide, ou appuie sur **Ctrl+G** sur une ligne vide pour parcourir l'historique des commandes sans doublons ni caractères indésirables.
 
 ## Fonctionnalités
 
-- Ouverture rapide avec **Tab Tab** (appui 2 fois sur **Tab**) ou **Ctrl+G**
-- Affichage de l'aide de la commande tapée (ex. `docker` + **Tab Tab** affiche l'aide de `docker`)
+- Ouverture rapide avec **Ctrl+G**
+- Affichage de l'aide de la commande tapée (ex. `docker` + **Ctrl+G** affiche l'aide de `docker`)
 - Historique des commandes filtré (sans caractères indésirables ni doublons), les plus récentes en haut
 - Ligne survolée en surbrillance
 - Insertion de la commande ou de l'option choisie sans l'exécuter : tu appuies sur Entrée toi-même
@@ -67,13 +67,12 @@ echo 'source "$HOME/.nag/nag.bash"' >> ~/.bashrc
 
 | Touche | Action |
 |---|---|
-| **Tab Tab** (2 fois sur Tab) | Affiche l'aide de la commande en cours (ex. `docker`) ou l'historique si la ligne est vide |
-| **Ctrl+G** | Ouvre la fenêtre / liste (raccourci de secours) |
+| **Ctrl+G** | Affiche l'aide de la commande en cours (ex. `docker`) ou l'historique si la ligne est vide |
 | Flèches haut / bas | Naviguer |
 | **Entrée** | Coller l'élément sélectionné sur la ligne |
 | **Échap** | Fermer sans rien choisir |
 
-Un seul **Tab** garde l'autocomplétion normale de bash.
+**Tab** garde son rôle normal d'autocomplétion de bash.
 
 ## Désinstallation
 
