@@ -45,8 +45,8 @@ Puis ouvre un nouveau terminal.
 ### Fichier .deb
 
 ```bash
-wget https://github.com/NAGYs77/nag_project/releases/download/v1.0.0/nag_1.0.0_all.deb
-sudo apt install ./nag_1.0.0_all.deb
+wget https://github.com/NAGYs77/nag_project/releases/download/v2.0.3/nag_2.0.3_all.deb
+sudo apt install ./nag_2.0.3_all.deb
 ```
 
 ### Depuis les sources
