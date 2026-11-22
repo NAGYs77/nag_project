@@ -1,14 +1,4 @@
 export NAG_JAR="${NAG_JAR:-$HOME/.nag/nag.jar}"
-__nag_last=0
-
-__nag_now_ms() {
-  if [ -n "${EPOCHREALTIME:-}" ]; then
-    local v="${EPOCHREALTIME/[.,]/}"
-    echo $(( v / 1000 ))
-  else
-    date +%s%3N
-  fi
-}
 
 __nag_open_side_window() {
   local out="$1"
@@ -88,17 +78,4 @@ __nag_run() {
   rm -f "$out"
 }
 
-__nag_tab_check() {
-  local now diff
-  now=$(__nag_now_ms)
-  diff=$(( now - __nag_last ))
-  __nag_last=$now
-  if [ "$diff" -lt 650 ]; then
-    __nag_last=0
-    __nag_run
-  fi
-}
-
-bind -x '"\C-x\C-t": __nag_tab_check'
-bind '"\t": "\C-x\C-t"'
 bind -x '"\C-g": __nag_run'

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-VERSION="1.0.0"
+VERSION="2.0.3"
 PKG="nag_${VERSION}_all"
 ROOT="build/$PKG"
 
